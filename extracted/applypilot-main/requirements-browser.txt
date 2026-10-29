@@ -1,3 +1,0 @@
-patchright
-camoufox==0.5.8
-faster-whisper==1.2.1
