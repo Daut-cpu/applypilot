@@ -55,12 +55,12 @@ chmod 600 ~/.config/search-work-world/secrets.env
 
 Заполните нужные ключи (все опциональны — используйте только то, что включено):
 
-| Переменная | Для чего |
-|---|---|
-| `OPENAI_API_KEY`, `AUTOPILOT_LLM_BASE_URL` | LLM через OpenAI-совместимый API |
-| `LLM7_API_KEY`, `GROQ_API_KEY`, `OPENROUTER_API_KEY`, `TOKENHARBOR_API_KEY` | альтернативные LLM-провайдеры |
-| `AUTOPILOT_EMAIL_ADDRESS`, `AUTOPILOT_EMAIL_APP_PASSWORD` | чтение писем с исходами заявок (Gmail — только app password!) |
-| `ADZUNA_APP_ID/KEY`, `JOOBLE_API_KEY`, `TAVILY_API_KEY` | дополнительные источники вакансий |
+| Переменная                                                                  | Для чего                                                      |
+|-----------------------------------------------------------------------------|---------------------------------------------------------------|
+| `OPENAI_API_KEY`, `AUTOPILOT_LLM_BASE_URL`                                  | LLM через OpenAI-совместимый API                              |
+| `LLM7_API_KEY`, `GROQ_API_KEY`, `OPENROUTER_API_KEY`, `TOKENHARBOR_API_KEY` | альтернативные LLM-провайдеры                                 |
+| `AUTOPILOT_EMAIL_ADDRESS`, `AUTOPILOT_EMAIL_APP_PASSWORD`                   | чтение писем с исходами заявок (Gmail — только app password!) |
+| `ADZUNA_APP_ID/KEY`, `JOOBLE_API_KEY`, `TAVILY_API_KEY`                     | дополнительные источники вакансий                             |
 
 CLI-провайеры (`claude`, `codex`, `grok`, `opencode`) работают без ключей — используют уже установленный CLI.
 
@@ -89,23 +89,20 @@ LLM нужен для ответов на нестандартные вопро�
 
 ```jsonc
 "profile": {
-  "first_name": "Ваше имя",
-  "last_name": "Фамилия",
-  "full_name": "Имя Фамилия",          // должен СОВПАДАТЬ с именем на CV — проверка агента!
-  "email": "you@example.com",
-  "phone": "+49 ...",                   // формат с кодом страны
-  "phone_country_code": "49",           // только цифры, без +
-  "location": "Berlin, Germany",
-  "country": "Germany",
-  "languages": "English, Russian, German",
-  "linkedin": "https://linkedin.com/in/...",
-  "github": "https://github.com/...",
-  "work_authorization": "...",          // ваше разрешение на работу (если есть)
-  "notice_period": "1 month",
-  "salary_expectation": "60,000 - 80,000 EUR",
-  "school": "...", "degree": "...", "discipline": "...",
-  "years_experience": "3",
-  "portfolio": "..."                    // ссылка на портфолио (для креативных ролей)
+  "first_name": "Даут",
+  "last_name": "Корсая",
+  "full_name": "Даут Корсая",          // должен СОВПАДАТЬ с именем на CV — проверка агента!
+  "email": "dautkorsaya@gmail.com",
+  "phone": "+972 559810900",                   // формат с кодом страны
+  "phone_country_code": "972",           // только цифры, без +
+  "location": "Tel-aviv, Israel",
+  "country": "Israel",
+  "languages": "English, Russian",
+  "linkedin": "https://www.linkedin.com/in/david-korsaia-586627419/",
+  "notice_period": "2 week",
+  "salary_expectation": "4000 - 5000 USD",
+  "school": "Financial University under the Government of the Russian Federation", "degree": "master", "discipline": "Applied Informatics",
+  "years_experience": "6",
 }
 ```
 
@@ -163,11 +160,9 @@ LLM недоступен. Также можно задать `persona.profile.sc
 
 ```jsonc
 "apply": { "answers": {
-  "visa": "...",                       // нужна ли спонсорская виза
   "work_authorization": "...",
   "why": "Почему вы/эта компания — ваш честный ответ одной фразой",
   "open_to_relocation": "Yes",        // или ваш личный ответ; пусто = спрашивать
-  "open_to_onsite": "...",
   ...
 }}
 ```
@@ -285,10 +280,10 @@ python tools/autopilot.py login https://www.linkedin.com/login
 
 ## 7. Частые проблемы
 
-| Симптом | Причина / решение |
-|---|---|
-| `doctor` ругается на CV | имя на PDF не совпадает с `profile.full_name`; пересоберите CV или профиль |
-| Вопросы анкет остаются пустыми | нет активного LLM-провайдера → `llm --probe`, затем `llm --enable`; либо заполните `apply.answers` |
-| Слишком много нерелевантных вакансий | термины ещё из примера — выполните `resume add --regen`; проверьте `keywords` |
-| Агент не отправляет ничего | dry_run=true по умолчанию; порог `min_cv_match`; `queue` покажет причины фильтрации |
-| CAPTCHA / логин площадки | решите в окне `--review`; для постоянных сессий — `login <url>` |
+| Симптом                              | Причина / решение                                                                                  |
+|--------------------------------------|----------------------------------------------------------------------------------------------------|
+| `doctor` ругается на CV              | имя на PDF не совпадает с `profile.full_name`; пересоберите CV или профиль                         |
+| Вопросы анкет остаются пустыми       | нет активного LLM-провайдера → `llm --probe`, затем `llm --enable`; либо заполните `apply.answers` |
+| Слишком много нерелевантных вакансий | термины ещё из примера — выполните `resume add --regen`; проверьте `keywords`                      |
+| Агент не отправляет ничего           | dry_run=true по умолчанию; порог `min_cv_match`; `queue` покажет причины фильтрации                |
+| CAPTCHA / логин площадки             | решите в окне `--review`; для постоянных сессий — `login <url>`                                    |
