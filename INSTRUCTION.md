@@ -70,10 +70,19 @@ source .venv/bin/activate
 
 ```sh
 pip install -r requirements.txt
-pip install -r requirements-dev.txt
+pip install -r requirements-dev.txt        # только для тестов, опционально
+pip install -r requirements-browser.txt    # patchright/camoufox — антидетект-браузеры, опционально
 ```
 
-Браузер для автоматизации форм (пропустите, если установлен Google Chrome — в конфиге `browser.channel = "chrome"`):
+Проверка, что установка прошла:
+
+```sh
+python -c "import playwright; print('ok')"
+```
+
+Если pip не может подключиться к PyPI (`ssl module is not available`) — сначала почините Python (п. 1.1), пересоздайте venv и повторите установку.
+
+Браузер для автоматизации форм (обязательно даже при наличии Google Chrome — команда ставит ядро Chromium для Playwright):
 
 ```sh
 python -m playwright install chromium
