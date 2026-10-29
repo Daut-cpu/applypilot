@@ -10,34 +10,90 @@
 
 ## 1. Установка
 
-> **macOS/Linux:** используйте `python3` и `pip3` (команд `python`/`pip` там обычно нет).
-> Рекомендуемый способ — виртуальное окружение:
-> ```sh
-> python3 -m venv .venv && source .venv/bin/activate   # после этого можно писать просто python/pip
-> ```
-> Если активировать venv не хотите, во всех командах ниже заменяйте `python3` на `python`.
+### 1.0 Важно: как копировать команды из этой инструкции
+
+- **Копируйте только сами команды, БЕЗ комментариев.** Строки вида
+  `python3 ... # пояснение`, вставленные в zsh целиком, вызывают ошибки
+  `parse error near ')'`, `unknown file attribute`, `missing end of string`.
+  Комментарий — это текст после символа `#`; его удаляйте перед вставкой
+  (либо вводите команду с Enter до того, как zsh увидит `#` — но надёжнее просто копировать без хвоста).
+- **Угловые скобки `<...>` — это заглушки**, их нельзя вставлять буквально.
+  Например, в `python3 tools/autopilot.py apply-url <url> --review` вместо
+  `<url>` подставьте реальную ссылку на вакансию, а в `ats <job>` / `outcome <job>` —
+  реальный id вакансии из вывода `queue`/`status`. Команда с `<...>` как есть
+  даёт `zsh: no such file or directory`.
+- На macOS команд `python`/`pip` обычно нет — используйте `python3`/`pip3` либо venv (см. ниже).
+
+### 1.1 Требуется Python 3.10+ (важно!)
+
+Если при установке появляется ошибка
+`Can't connect to HTTPS URL because the SSL module is not available` —
+значит ваш `python3` собран **без модуля ssl** (частая проблема Homebrew после обновления macOS:
+старый бинарь Python слинкован с удалённой библиотекой OpenSSL). В таком venv бесполезен —
+pip не может скачать ни один пакет.
+
+Диагностика:
 
 ```sh
-# 1) Python-зависимости ядра агента
-pip3 install -r requirements.txt
-pip3 install -r requirements-dev.txt      # для тестов (опционально)
+python3 -c "import ssl; print(ssl.OPENSSL_VERSION)"
+```
 
-# 2) Браузер для автоматизации форм
-python3 -m playwright install chromium    # пропустите, если у вас установлен Google Chrome
-                                         # (browser.channel = "chrome" по умолчанию)
+Если это падает с `ModuleNotFoundError: No module named '_ssl'` — пересоберите Python:
 
-# 3) Опционально: OCR для сканированных PDF резюме
-#    Установите Tesseract: https://github.com/tesseract-ocr/tesseract
+```sh
+brew reinstall python@3.12
+```
 
-# 4) Дашборд JobSync (Next.js) — опционально, агент работает и без него
+Либо поставьте отдельный интерпретатор, например `brew install python@3.12`
+и работайте через `python3.12` / `~/.brew/bin/python3.12`. После починки
+удалите сломанное окружение и создайте заново:
+
+```sh
+rm -rf .venv
+python3.12 -m venv .venv
+source .venv/bin/activate
+```
+
+### 1.2 Виртуальное окружение (рекомендуется)
+
+```sh
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+После активации можно писать просто `python`/`pip`, а зависимости ставятся изолированно
+(на macOS системный pip также часто ругается `externally-managed-environment`).
+Каждый новый запуск терминала требует повторного `source .venv/bin/activate`.
+Если venv использовать не хотите, во всех командах ниже используйте `python3`/`pip3`.
+
+### 1.3 Установка зависимостей
+
+```sh
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+```
+
+Браузер для автоматизации форм (пропустите, если установлен Google Chrome — в конфиге `browser.channel = "chrome"`):
+
+```sh
+python -m playwright install chromium
+```
+
+Опционально OCR для сканированных PDF резюме — установите Tesseract (https://github.com/tesseract-ocr/tesseract), например `brew install tesseract`.
+
+Дашборд JobSync (Next.js) — опционально, агент работает и без него:
+
+```sh
 npm install
 ```
 
-Проверка окружения:
+### 1.4 Проверка окружения
 
 ```sh
-python3 tools/autopilot.py doctor         # проверяет config.json, CV, LLM-цепочку, почту
+python tools/autopilot.py doctor
 ```
+
+(или `python3 tools/autopilot.py doctor`, если venv не активирован)
 
 ---
 
@@ -57,8 +113,9 @@ cp autopilot/config.example.json autopilot/config.json
 mkdir -p ~/.config/search-work-world
 cp autopilot/secrets.env.example ~/.config/search-work-world/secrets.env
 chmod 600 ~/.config/search-work-world/secrets.env
-# альтернатива: export AUTOPILOT_SECRETS_FILE=/ваш/путь/secrets.env
 ```
+
+(альтернативный путь файла секретов: `export AUTOPILOT_SECRETS_FILE=/ваш/путь/secrets.env`)
 
 Заполните нужные ключи (все опциональны — используйте только то, что включено):
 
@@ -76,10 +133,12 @@ CLI-провайеры (`claude`, `codex`, `grok`, `opencode`) работают 
 Все провайдеры в `config.json` выключены по умолчанию. Включите один из них:
 
 ```sh
-python3 tools/autopilot.py llm --probe              # проверить доступность всех
-python3 tools/autopilot.py llm --enable groq        # включить провайдера из списка providers
-python3 tools/autopilot.py llm --set-model <name> <model>
+python3 tools/autopilot.py llm --probe
+python3 tools/autopilot.py llm --enable groq
+python3 tools/autopilot.py llm --set-model <имя_провайдера> <имя_модели>
 ```
+
+(`--set-model` запускайте только после `llm --probe`: вместо `<...>` подставьте реальные значения — см. п. 1.0)
 
 LLM нужен для ответов на нестандартные вопросы анкет; ответы строятся строго на тексте вашего CV
 (защита от выдумки), кэшируются и при отсутствии LLM попадают в `qa --pending` — то есть ждут вашего ответа.
@@ -122,12 +181,18 @@ LLM нужен для ответов на нестандартные вопро�
 
 ```sh
 mkdir -p autopilot/resumes
-cp ~/моё_резюме.pdf autopilot/resumes/appsec.pdf       # CV кладём сюда (папка в gitignore)
+cp ~/моё_резюме.pdf autopilot/resumes/appsec.pdf
+```
 
+(папка `autopilot/resumes` в gitignore; положите туда своё CV, при желании переименуйте файл)
+
+```sh
 python3 tools/autopilot.py resume add \
   --file autopilot/resumes/appsec.pdf \
-  --role "Application Security Engineer"               # или ваша роль
+  --role "Application Security Engineer"
 ```
+
+(`--role` — ваша реальная роль, например `"Data Analyst"` или `"Photographer"`)
 
 Что делает `resume add`:
 - создаёт/обновляет персону в `personas.<key>` с путём к CV;
@@ -139,10 +204,12 @@ python3 tools/autopilot.py resume add \
 Полезно после смены CV или роли:
 
 ```sh
-python3 tools/autopilot.py resume list                  # посмотреть персоны
-python3 tools/autopilot.py resume add --regen           # перегенерировать термины заново
-python3 tools/autopilot.py resume remove <key>
+python3 tools/autopilot.py resume list
+python3 tools/autopilot.py resume add --regen
+python3 tools/autopilot.py resume remove <ключ_персоны>
 ```
+
+(`resume list` покажет ключи; `<ключ_персоны>` — заглушка, подставьте реальный ключ, см. п. 1.0)
 
 Требования к CV:
 - PDF (сканы поддерживаются через OCR, если установлен Tesseract);
@@ -198,8 +265,8 @@ LLM недоступен. Также можно задать `persona.profile.sc
 или запускайте аналитику:
 
 ```sh
-python3 tools/autopilot.py keywords                     # какие ключевые слова реально дают вакансии
-python3 tools/autopilot.py analyze_rejections.py        # анализ причин отказов (скорректируйте bad_terms)
+python3 tools/autopilot.py keywords
+python3 tools/autopilot.py analyze_rejections.py
 ```
 
 ### 3.6 Тон общения и стиль (LLM-персонализация ответов)
@@ -215,38 +282,51 @@ python3 tools/autopilot.py analyze_rejections.py        # анализ прич�
 
 ## 4. Первый запуск — безопасный маршрут
 
-Начинайте строго по этой цепочке, от консервативного к автономному:
+Начинайте строго по этой цепочке, от консервативного к автономному.
+Выполняйте команды **по одной**, без комментариев (см. п. 1.0):
 
 ```sh
-# 0) Диагностика
+# 0) Диагностика — убедитесь, что python3/venv и зависимости работают
 python3 tools/autopilot.py doctor
+```
 
+```sh
 # 1) Только сбор вакансий (без откликов)
 python3 tools/autopilot.py discover --source vendor --max-keywords 5
+```
 
+```sh
 # 2) Посмотреть очередь: что агент собирается отправлять
 python3 tools/autopilot.py queue
 python3 tools/autopilot.py status
+```
 
+```sh
 # 3) Dry run: заполнить форму, НИЧЕГО не отправляя
 python3 tools/autopilot.py apply --dry-run --max 1
+```
 
+```sh
 # 4) Ассистированный режим: видимый браузер, агент заполняет, прикладывает CV и cover letter,
 #    решает CAPTCHA и жмёт Submit ВЫ (до manual_wait_seconds)
 python3 tools/autopilot.py apply --review --submit --max 5
+```
 
+```sh
 # 5) Полностью автономно — только когда доверяете результатам --review
 python3 tools/autopilot.py apply --submit
+```
 
+```sh
 # Полный цикл: discover + apply
 python3 tools/autopilot.py run --dry-run
 python3 tools/autopilot.py run --review --max 5
 ```
 
-Отклик по конкретной ссылке:
+Отклик по конкретной ссылке (`<url>` замените реальной ссылкой на вакансию, скобки <> вводить не нужно):
 
 ```sh
-python3 tools/autopilot.py apply-url <url> --review
+python3 tools/autopilot.py apply-url https://example-company.com/jobs/123 --review
 ```
 
 Логика порога качества: `apply.min_score_to_apply` и `personas.<key>.min_cv_match`
@@ -256,18 +336,20 @@ python3 tools/autopilot.py apply-url <url> --review
 
 ## 5. Обратная связь и ведение
 
-```sh
-python3 tools/autopilot.py inbox --apply     # прочитать письма-исходы и обновить статусы
-python3 tools/autopilot.py followups         # просроченные отклики без ответа
-python3 tools/autopilot.py outreach          # пакеты для писем рекрутерам (--export-csv)
-python3 tools/autopilot.py ghost             # найти компании-«призраки» (вечно висят вакансии)
-python3 tools/autopilot.py block --from-ghost --apply   # занести их в blocked_companies
-python3 tools/autopilot.py ats <job>         # разбор разрыва CV vs текст вакансии
-python3 tools/autopilot.py qa --pending      # вопросы, требующие вашего ответа
-python3 tools/autopilot.py manual            # формы, ожидающие вашего клика
-python3 tools/autopilot.py outcome <job> --status Interview   # вручную пометить исход
-python3 tools/autopilot.py clean             # почистить старые скриншоты
-```
+| Команда | Что делает |
+|---|---|
+| `python3 tools/autopilot.py inbox --apply` | прочитать письма-исходы и обновить статусы |
+| `python3 tools/autopilot.py followups` | просроченные отклики без ответа |
+| `python3 tools/autopilot.py outreach` | пакеты для писем рекрутерам (добавьте `--export-csv`) |
+| `python3 tools/autopilot.py ghost` | найти компании-«призраки» (вечно висят вакансии) |
+| `python3 tools/autopilot.py block --from-ghost --apply` | занести их в blocked_companies |
+| `python3 tools/autopilot.py ats <id_вакансии>` | разбор разрыва CV vs текст вакансии |
+| `python3 tools/autopilot.py qa --pending` | вопросы, требующие вашего ответа |
+| `python3 tools/autopilot.py manual` | формы, ожидающие вашего клика |
+| `python3 tools/autopilot.py outcome <id_вакансии> --status Interview` | вручную пометить исход |
+| `python3 tools/autopilot.py clean` | почистить старые скриншоты |
+
+В `<id_вакансии>` подставьте реальный id из вывода `queue`/`status` (скобки <> вводить не нужно — см. п. 1.0).
 
 Вход в площадки один раз (сессия сохранится в `autopilot/browser-state.json` — не коммитить!):
 
@@ -298,4 +380,8 @@ python3 tools/autopilot.py login https://www.linkedin.com/login
 | Вопросы анкет остаются пустыми | нет активного LLM-провайдера → `llm --probe`, затем `llm --enable`; либо заполните `apply.answers` |
 | Слишком много нерелевантных вакансий | термины ещё из примера — выполните `resume add --regen`; проверьте `keywords` |
 | Агент не отправляет ничего | dry_run=true по умолчанию; порог `min_cv_match`; `queue` покажет причины фильтрации |
-| CAPTCHA / логин площадки | решите в окне `--review`; для постоянных сессий — `login <url>` |
+| CAPTCHA / логин площадки | решите в окне `--review`; для постоянных сессий — `login <url>` (реальная ссылка) |
+| `ModuleNotFoundError: No module named 'playwright'` | Python-зависимости не установлены (или ставились в сломанный venv без ssl). Почините Python (п. 1.1), пересоздайте venv (п. 1.2), выполните `pip install -r requirements.txt`, затем `python -m playwright install chromium`. Проверка: `python -c "import playwright"` |
+| `Can't connect to HTTPS URL because the SSL module is not available` | интерпретатор собран без модуля ssl — см. п. 1.1 (`brew reinstall python@3.12`) |
+| `zsh: parse error near ')'` / `unknown file attribute` | вы вставили команду вместе с комментарием `# ...` — копируйте только команду (п. 1.0) |
+| `zsh: no such file or directory: url` / `job` | вы вставили заглушку `<url>`/`<job>` буквально — подставьте реальное значение без скобок (п. 1.0) |
