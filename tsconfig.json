@@ -30,6 +30,5 @@
     ".next/types/**/*.ts",
     "src/lib/data/seedData.js"
   ],
-  "exclude": ["node_modules",
-    "scripts", "autopilot", "tools", ".next"]
+  "exclude": ["node_modules", "scripts", "autopilot", "tools", ".next"]
 }

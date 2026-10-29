@@ -15,7 +15,7 @@ RUN npm ci
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
-COPY ../../../../../Desktop/applypilot-main .
+COPY . .
 
 ENV DATABASE_URL=file:/data/dev.db
 
