@@ -10,13 +10,20 @@
 
 ## 1. Установка
 
+> **macOS/Linux:** используйте `python3` и `pip3` (команд `python`/`pip` там обычно нет).
+> Рекомендуемый способ — виртуальное окружение:
+> ```sh
+> python3 -m venv .venv && source .venv/bin/activate   # после этого можно писать просто python/pip
+> ```
+> Если активировать venv не хотите, во всех командах ниже заменяйте `python3` на `python`.
+
 ```sh
 # 1) Python-зависимости ядра агента
-pip install -r requirements.txt
-pip install -r requirements-dev.txt      # для тестов (опционально)
+pip3 install -r requirements.txt
+pip3 install -r requirements-dev.txt      # для тестов (опционально)
 
 # 2) Браузер для автоматизации форм
-python -m playwright install chromium    # пропустите, если у вас установлен Google Chrome
+python3 -m playwright install chromium    # пропустите, если у вас установлен Google Chrome
                                          # (browser.channel = "chrome" по умолчанию)
 
 # 3) Опционально: OCR для сканированных PDF резюме
@@ -29,7 +36,7 @@ npm install
 Проверка окружения:
 
 ```sh
-python tools/autopilot.py doctor         # проверяет config.json, CV, LLM-цепочку, почту
+python3 tools/autopilot.py doctor         # проверяет config.json, CV, LLM-цепочку, почту
 ```
 
 ---
@@ -69,9 +76,9 @@ CLI-провайеры (`claude`, `codex`, `grok`, `opencode`) работают 
 Все провайдеры в `config.json` выключены по умолчанию. Включите один из них:
 
 ```sh
-python tools/autopilot.py llm --probe              # проверить доступность всех
-python tools/autopilot.py llm --enable groq        # включить провайдера из списка providers
-python tools/autopilot.py llm --set-model <name> <model>
+python3 tools/autopilot.py llm --probe              # проверить доступность всех
+python3 tools/autopilot.py llm --enable groq        # включить провайдера из списка providers
+python3 tools/autopilot.py llm --set-model <name> <model>
 ```
 
 LLM нужен для ответов на нестандартные вопросы анкет; ответы строятся строго на тексте вашего CV
@@ -114,7 +121,7 @@ LLM нужен для ответов на нестандартные вопро�
 mkdir -p autopilot/resumes
 cp ~/моё_резюме.pdf autopilot/resumes/appsec.pdf       # CV кладём сюда (папка в gitignore)
 
-python tools/autopilot.py resume add \
+python3 tools/autopilot.py resume add \
   --file autopilot/resumes/appsec.pdf \
   --role "Application Security Engineer"               # или ваша роль
 ```
@@ -129,9 +136,9 @@ python tools/autopilot.py resume add \
 Полезно после смены CV или роли:
 
 ```sh
-python tools/autopilot.py resume list                  # посмотреть персоны
-python tools/autopilot.py resume add --regen           # перегенерировать термины заново
-python tools/autopilot.py resume remove <key>
+python3 tools/autopilot.py resume list                  # посмотреть персоны
+python3 tools/autopilot.py resume add --regen           # перегенерировать термины заново
+python3 tools/autopilot.py resume remove <key>
 ```
 
 Требования к CV:
@@ -142,7 +149,7 @@ python tools/autopilot.py resume remove <key>
 Для второй профессии:
 
 ```sh
-python tools/autopilot.py resume add --file autopilot/resumes/creative.pdf \
+python3 tools/autopilot.py resume add --file autopilot/resumes/creative.pdf \
   --name creative --role "Photographer / Videographer"
 ```
 
@@ -186,8 +193,8 @@ LLM недоступен. Также можно задать `persona.profile.sc
 или запускайте аналитику:
 
 ```sh
-python tools/autopilot.py keywords                     # какие ключевые слова реально дают вакансии
-python tools/autopilot.py analyze_rejections.py        # анализ причин отказов (скорректируйте bad_terms)
+python3 tools/autopilot.py keywords                     # какие ключевые слова реально дают вакансии
+python3 tools/autopilot.py analyze_rejections.py        # анализ причин отказов (скорректируйте bad_terms)
 ```
 
 ### 3.6 Тон общения и стиль (LLM-персонализация ответов)
@@ -196,7 +203,7 @@ python tools/autopilot.py analyze_rejections.py        # анализ причи
 - заполните `bio` (см. 3.3) — он попадает в контекст;
 - задайте свои формулировки в `apply.answers.why` и других ключах — правила и кэш (`qa_answers`)
   предпочитают ваши текстовые варианты, а не выдуманные LLM;
-- проверяйте подозрительные кэшированные ответы: `python tools/autopilot.py qa --audit`,
+- проверяйте подозрительные кэшированные ответы: `python3 tools/autopilot.py qa --audit`,
  Pending правите через `qa --label/--key/--set`.
 
 ---
@@ -207,34 +214,34 @@ python tools/autopilot.py analyze_rejections.py        # анализ причи
 
 ```sh
 # 0) Диагностика
-python tools/autopilot.py doctor
+python3 tools/autopilot.py doctor
 
 # 1) Только сбор вакансий (без откликов)
-python tools/autopilot.py discover --source vendor --max-keywords 5
+python3 tools/autopilot.py discover --source vendor --max-keywords 5
 
 # 2) Посмотреть очередь: что агент собирается отправлять
-python tools/autopilot.py queue
-python tools/autopilot.py status
+python3 tools/autopilot.py queue
+python3 tools/autopilot.py status
 
 # 3) Dry run: заполнить форму, НИЧЕГО не отправляя
-python tools/autopilot.py apply --dry-run --max 1
+python3 tools/autopilot.py apply --dry-run --max 1
 
 # 4) Ассистированный режим: видимый браузер, агент заполняет, прикладывает CV и cover letter,
 #    решает CAPTCHA и жмёт Submit ВЫ (до manual_wait_seconds)
-python tools/autopilot.py apply --review --submit --max 5
+python3 tools/autopilot.py apply --review --submit --max 5
 
 # 5) Полностью автономно — только когда доверяете результатам --review
-python tools/autopilot.py apply --submit
+python3 tools/autopilot.py apply --submit
 
 # Полный цикл: discover + apply
-python tools/autopilot.py run --dry-run
-python tools/autopilot.py run --review --max 5
+python3 tools/autopilot.py run --dry-run
+python3 tools/autopilot.py run --review --max 5
 ```
 
 Отклик по конкретной ссылке:
 
 ```sh
-python tools/autopilot.py apply-url <url> --review
+python3 tools/autopilot.py apply-url <url> --review
 ```
 
 Логика порога качества: `apply.min_score_to_apply` и `personas.<key>.min_cv_match`
@@ -245,22 +252,22 @@ python tools/autopilot.py apply-url <url> --review
 ## 5. Обратная связь и ведение
 
 ```sh
-python tools/autopilot.py inbox --apply     # прочитать письма-исходы и обновить статусы
-python tools/autopilot.py followups         # просроченные отклики без ответа
-python tools/autopilot.py outreach          # пакеты для писем рекрутерам (--export-csv)
-python tools/autopilot.py ghost             # найти компании-«призраки» (вечно висят вакансии)
-python tools/autopilot.py block --from-ghost --apply   # занести их в blocked_companies
-python tools/autopilot.py ats <job>         # разбор разрыва CV vs текст вакансии
-python tools/autopilot.py qa --pending      # вопросы, требующие вашего ответа
-python tools/autopilot.py manual            # формы, ожидающие вашего клика
-python tools/autopilot.py outcome <job> --status Interview   # вручную пометить исход
-python tools/autopilot.py clean             # почистить старые скриншоты
+python3 tools/autopilot.py inbox --apply     # прочитать письма-исходы и обновить статусы
+python3 tools/autopilot.py followups         # просроченные отклики без ответа
+python3 tools/autopilot.py outreach          # пакеты для писем рекрутерам (--export-csv)
+python3 tools/autopilot.py ghost             # найти компании-«призраки» (вечно висят вакансии)
+python3 tools/autopilot.py block --from-ghost --apply   # занести их в blocked_companies
+python3 tools/autopilot.py ats <job>         # разбор разрыва CV vs текст вакансии
+python3 tools/autopilot.py qa --pending      # вопросы, требующие вашего ответа
+python3 tools/autopilot.py manual            # формы, ожидающие вашего клика
+python3 tools/autopilot.py outcome <job> --status Interview   # вручную пометить исход
+python3 tools/autopilot.py clean             # почистить старые скриншоты
 ```
 
 Вход в площадки один раз (сессия сохранится в `autopilot/browser-state.json` — не коммитить!):
 
 ```sh
-python tools/autopilot.py login https://www.linkedin.com/login
+python3 tools/autopilot.py login https://www.linkedin.com/login
 ```
 
 ---
