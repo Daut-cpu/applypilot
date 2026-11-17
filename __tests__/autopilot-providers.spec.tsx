@@ -36,8 +36,8 @@ it("loads OpenCode models and keeps a Free verdict attached to the tested model"
   const user = userEvent.setup();
   await user.click(screen.getByRole("tab", { name: "AI providers" }));
   expect(await screen.findByText("OpenCode (Free / Go)")).toBeVisible();
-  await user.click(screen.getByRole("button", { name: "List models", exact: true }));
-  await user.click(screen.getByRole("button", { name: "Test", exact: true }));
+  await user.click(screen.getByRole("button", { name: "List models" }));
+  await user.click(screen.getByRole("button", { name: "Test" }));
   expect(await screen.findByText("WORKING")).toBeVisible();
   await user.selectOptions(screen.getByLabelText("Model for opencode"), "opencode-go/gpt-6-luna");
   await waitFor(() => expect(screen.queryByText("WORKING")).not.toBeInTheDocument());

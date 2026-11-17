@@ -49,9 +49,9 @@ it("renders JobWatch canonical snapshot and runtime warnings in Sources", async 
   const source: SourceRow = { source: "jobwatch", known: true, enabled: true, every_hours: 0,
     runs: 0, last_run: null, last_found: 0, last_stored: 0, last_errors: 0, found_total: 0,
     stored_total: 0, jobs: 0, queued: 0, submitted: 0, interviews: 0, adapters: [
-      { adapter: "JobWatch creative: canonical DB snapshot", persona: "creative", status: "ok", raw: 10, kept: 0, errors: 0, t: null, retry_at: null },
-      { adapter: "JobWatch watchdog: stale_running", persona: "all", status: "partial", raw: 0, kept: 0, errors: 1, t: null, retry_at: null },
-      { adapter: "Bitbucket/Tor: no_accepted_targets", persona: "all", status: "disabled", raw: 0, kept: 0, errors: 0, t: null, retry_at: null },
+      { adapter: "JobWatch creative: canonical DB snapshot", persona: "creative", status: "ok", raw: 10, kept: 0, errors: 0, t: "2026-01-01T00:00:00Z", retry_at: null },
+      { adapter: "JobWatch watchdog: stale_running", persona: "all", status: "partial", raw: 0, kept: 0, errors: 1, t: "2026-01-01T00:00:00Z", retry_at: null },
+      { adapter: "Bitbucket/Tor: no_accepted_targets", persona: "all", status: "disabled", raw: 0, kept: 0, errors: 0, t: "2026-01-01T00:00:00Z", retry_at: null },
     ] };
   render(<SourcesPanel sources={[source]} persona="all" locked={false} busy={false} onToggle={vi.fn()} onRun={vi.fn()} />);
   await userEvent.click(screen.getByText("JobWatch health"));
